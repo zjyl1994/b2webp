@@ -1,0 +1,31 @@
+<div id="main" data-title="{{.info.HashId}}">
+    <div class="row">
+        <img src="{{.img}}">
+    </div>
+    <div class="row">
+        <div class="table-responsive">
+            <table class="table mt-2 caption-top">
+                <caption>图片链接</caption>
+                <tbody>
+                    <tr>
+                        <th scope="col">URL</th>
+                        <td scope="col">{{.img}}</td>
+                    </tr>
+                    <tr>
+                        <th scope="col">HTML</th>
+                        <td scope="col">&lt;img src="{{.img}}"&gt;</td>
+                    </tr>
+                    <tr>
+                        <th scope="col">BBCode</th>
+                        <td scope="col">[img]{{.img}}[/img]</td>
+                    </tr>
+                    <tr>
+                        <th scope="col">Markdown</th>
+                        <td scope="col">![]({{.img}})</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+  
+</div>

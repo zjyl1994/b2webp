@@ -1,0 +1,73 @@
+<div id="main" x-data="data()" @keydown.window.ctrl.v="actionPaste" data-title="上传">
+
+    <div class="input-group mb-3">
+        <input class="form-control" type="file" id="formFile" accept="image/jpeg,image/png,image/gif,image/webp"
+            @change="fileInputChange">
+        <button type="button" class="btn btn-outline-primary" @click="actionUpload" :disabled="!imageBuffer">上传</button>
+        <button type="button" class="btn btn-outline-primary" @click="actionPaste"
+            :disabled="!navigator.clipboard">粘贴</button>
+    </div>
+
+    <img :src="readFileAsDataURL(imageBuffer)" x-show="imageBuffer" class="img-fluid border mb-3 shadow">
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"
+    integrity="sha256-yPqP9Fer3NIS83oH7y8pLJmQEd/6vKpXf7Hh4Adsplg=" crossorigin="anonymous" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/webp-converter-browser@1.0.4/dist/index.min.js"
+    integrity="sha256-IT8niI4YP/XLmcASezo2vA7MC8KaAj7CxhZVeR6Wcx0=" crossorigin="anonymous"></script>
+<script>
+    function readFileAsDataURL(file) {
+        if (!file) return '';
+        return new Promise((resolve, reject) => {
+            let fr = new FileReader();
+            fr.onload = () => resolve(fr.result);
+            fr.onerror = reject;
+            fr.readAsDataURL(file);
+        })
+    }
+
+    function data() {
+        return {
+            imageBuffer: null,
+            fileInputChange: function (event) {
+                const file = event.target.files[0];
+                if (file) {
+                    this.imageBuffer = file;
+                    this.imageChange();
+                }
+            },
+
+            imageChange: async function () {
+                if (this.imageBuffer && (this.imageBuffer.type == 'image/jpeg' || this.imageBuffer.type == 'image/png'))
+                    this.imageBuffer = await webpConverterBrowser.blobToWebP(this.imageBuffer)
+            },
+
+            actionUpload: function () {
+                if (!this.imageBuffer) return;
+                const formData = new FormData();
+                formData.append('image', this.imageBuffer);
+                fetch('/upload', {
+                    method: 'POST',
+                    body: formData,
+                }).then(response => response.json())
+                    .then(data => window.location = data.info_page)
+                    .catch(e => console.error(e));
+            },
+            actionPaste: async function () {
+                try {
+                    const clipboardItems = await navigator.clipboard.read();
+                    for (const clipboardItem of clipboardItems) {
+                        const imageTypes = clipboardItem.types.filter(type => type.startsWith('image/'))
+                        for (const imageType of imageTypes) {
+                            const blob = await clipboardItem.getType(imageType);
+                            this.imageBuffer = blob;
+                            this.imageChange();
+                        }
+                    }
+                } catch (err) {
+                    console.error(err.name, err.message);
+                }
+            }
+        }
+    }
+</script>
