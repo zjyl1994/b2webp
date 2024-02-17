@@ -58,6 +58,7 @@ func Run(listen string) error {
 	app.Get("/test", testHandler)
 
 	app.Get("/", UploadImagePage)
+	app.Get("/upload", UploadImagePage)
 	app.Post("/upload", UploadImageHandler)
 	app.Get("/delete/:hashid/:delcode", DeleteImageHandler)
 

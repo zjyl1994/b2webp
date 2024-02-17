@@ -24,5 +24,6 @@ window.onload = function () {
     $each('[data-render-text]', e => e.innerText = $eval(e.dataset.renderText));
     $each('#main', e => {
         if (e.dataset.title) document.title = e.dataset.title;
+        if (e.dataset.navi) $each(`#navitem-${e.dataset.navi}`, e => e.classList.add('active'));
     });
 }
