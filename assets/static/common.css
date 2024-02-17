@@ -1,0 +1,12 @@
+.containter{
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+}
+.imageview{
+    max-width: 600px;
+    max-height: 600px;
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+    border: solid 1px;
+    box-shadow: 6px 6px 3px 0px #d1cfd1;
+}

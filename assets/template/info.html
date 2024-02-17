@@ -1,33 +1,35 @@
 <div id="main" data-title="{{.info.HashId}}">
-    <div class="row">
-        <div class="d-flex justify-content-center my-3">
-            <img src="{{.img}}" class="img-fluid border shadow" style="max-width: 800px; max-height: 600px;">
-        </div>
-    </div>
-    <div class="row">
-        <div class="table-responsive">
-            <table class="table mt-2 caption-top">
-                <caption>图片链接</caption>
-                <tbody>
-                    <tr>
-                        <th scope="col">URL</th>
-                        <td scope="col">{{.img}}</td>
-                    </tr>
-                    <tr>
-                        <th scope="col">HTML</th>
-                        <td scope="col">&lt;img src="{{.img}}"&gt;</td>
-                    </tr>
-                    <tr>
-                        <th scope="col">BBCode</th>
-                        <td scope="col">[img]{{.img}}[/img]</td>
-                    </tr>
-                    <tr>
-                        <th scope="col">Markdown</th>
-                        <td scope="col">![]({{.img}})</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <img src="{{.img}}" class="imageview">
+
+    <table>
+        <tbody>
+            <tr>
+                <th>URL</th>
+                <td>{{.img}}</td>
+            </tr>
+            <tr>
+                <th>HTML</th>
+                <td>&lt;img src="{{.img}}"&gt;</td>
+            </tr>
+            <tr>
+                <th>BBCode</th>
+                <td>[img]{{.img}}[/img]</td>
+            </tr>
+            <tr>
+                <th>Markdown</th>
+                <td>![]({{.img}})</td>
+            </tr>
+
+            <tr>
+                <th>时间</th>
+                <td data-render-text="timestamp2str({{.info.UploadTime}})"></td>
+            </tr>
+            <tr>
+                <th>大小</th>
+                <td data-render-text="formatBytes({{.info.FileSize}})"></td>
+            </tr>
+        </tbody>
+    </table>
+
 
 </div>
