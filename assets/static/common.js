@@ -1,6 +1,6 @@
 const $each = (selector, callback) => document.querySelectorAll(selector).forEach(callback);
 const $eval = expr => (new Function(`return (${expr})`)());
-const $onclick = (selector, handler) => $each(selector, e => e.addEventListener('click', handler, false));
+const $onclick = (selector, handler) => $each(selector, e => e.addEventListener('click', handler));
 
 function timestamp2str(ts) {
     let pad2 = num => num < 10 ? '0' + num : num;
@@ -25,5 +25,12 @@ window.onload = function () {
     $each('#main', e => {
         if (e.dataset.title) document.title = e.dataset.title;
         if (e.dataset.navi) $each(`#navitem-${e.dataset.navi}`, e => e.classList.add('active'));
+    });
+    $onclick('.copy-text', function() {
+        try {
+            navigator.clipboard.writeText(this.innerText);
+        } catch (error) {
+            console.error(error.message);
+        }
     });
 }

@@ -10,3 +10,6 @@
     border: solid 1px;
     box-shadow: 6px 6px 3px 0px #d1cfd1;
 }
+.copy-text{
+    cursor: copy;
+}
