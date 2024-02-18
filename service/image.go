@@ -85,3 +85,30 @@ func (s imageService) Create(contentType, fileHash string, fileSize uint64) (*mo
 	err := vars.Database.Create(&m).Error
 	return &m, err
 }
+
+func (s imageService) TotalCount() (count int64, err error) {
+	err = vars.Database.Model(&models.Image{}).Count(&count).Error
+	return count, err
+}
+
+func (s imageService) RealTotalCount() (count int64, err error) {
+	err = vars.Database.Model(&models.Image{}).Group("file_hash").Count(&count).Error
+	return count, err
+}
+
+func (s imageService) TotalSize() (sum int64, err error) {
+	var result struct {
+		FileSize int64
+	}
+	err = vars.Database.Model(&models.Image{}).Select("SUM(file_size) as file_size").First(&result).Error
+	return result.FileSize, err
+}
+
+func (s imageService) RealTotalSize() (count int64, err error) {
+	var result struct {
+		FileSize int64
+	}
+	err = vars.Database.Table("(?) as u", vars.Database.Model(&models.Image{}).Select("file_size").
+		Group("file_hash")).Select("SUM(file_size) as file_size").First(&result).Error
+	return result.FileSize, err
+}

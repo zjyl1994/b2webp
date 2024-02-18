@@ -25,6 +25,9 @@ var (
 	HashId       *hashids.HashID
 	MemoryCache  *freecache.Cache
 	CronInstance *cron.Cron
+
+	TotalImageCount int64
+	TotalImageSize  int64
 )
 
 func Getenv(name string) string {

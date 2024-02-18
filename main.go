@@ -120,6 +120,25 @@ func errMain() (err error) {
 		return err
 	}
 
+	if totalCount, err := service.ImageService.TotalCount(); err != nil {
+		logrus.Errorln(err.Error())
+	} else {
+		vars.TotalImageCount = totalCount
+	}
+	if totalSize, err := service.ImageService.TotalSize(); err != nil {
+		logrus.Errorln(err.Error())
+	} else {
+		vars.TotalImageSize = totalSize
+	}
+
+	if realCount, err := service.ImageService.RealTotalCount(); err == nil {
+		logrus.Infoln("Image total count", vars.TotalImageCount, "real", realCount)
+	}
+
+	if realSize, err := service.ImageService.RealTotalSize(); err == nil {
+		logrus.Infoln("Image total size", utils.ByteSizeStr(vars.TotalImageSize), "real", utils.ByteSizeStr(realSize))
+	}
+
 	logrus.Infoln("Starting B2WEBP service...")
 	return server.Run(vars.ListenAddress)
 }

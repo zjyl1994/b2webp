@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/url"
 	"os"
+	"sync/atomic"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -63,6 +64,9 @@ func UploadImageHandler(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+
+	atomic.AddInt64(&vars.TotalImageCount, 1)
+	atomic.AddInt64(&vars.TotalImageSize, fh.Size)
 
 	renderItem, err := image2RenderItem(image)
 	if err != nil {

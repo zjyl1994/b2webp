@@ -3,6 +3,8 @@ package utils
 import (
 	"math/rand"
 	"strings"
+
+	"github.com/inhies/go-bytesize"
 )
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
@@ -28,4 +30,8 @@ func RandString(length int) string {
 	}
 
 	return sb.String()
+}
+
+func ByteSizeStr(b int64) string {
+	return bytesize.ByteSize(b).String()
 }
