@@ -9,8 +9,8 @@
 }
 
 .imagesize {
-    max-width: 600px;
-    max-height: 600px;
+    max-width: 100%;
+    max-height: 100%;
 }
 
 .imageview {
@@ -30,6 +30,11 @@
 
 .mt {
     margin-top: 1em;
+}
+
+.py{
+    padding-top: .25em;
+    padding-bottom: .25em;
 }
 
 .light-text {

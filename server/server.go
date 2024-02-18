@@ -26,7 +26,7 @@ func Run(listen string) error {
 		Views:                 engine,
 		ViewsLayout:           "layout",
 		PassLocalsToViews:     true,
-		BodyLimit:             int(10 * bytesize.MB),
+		BodyLimit:             int(5 * bytesize.MB),
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
 			var code int
 			var errorMessage string
