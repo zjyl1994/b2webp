@@ -1,20 +1,25 @@
-<div id="main" x-data="data()" @keydown.window.ctrl.v="actionPaste" data-title="上传" data-navi="upload">
+<div id="main" x-data="data()" @keydown.window.ctrl.v="actionPaste" data-title="{{.site_name}}" data-navi="upload">
 
     <div>
-        <svg x-show="!imageBuffer" width="600px" height="400px" class="imageview" xmlns="http://www.w3.org/2000/svg" role="img"
-            preserveAspectRatio="xMidYMid slice" focusable="false">
+        <svg x-show="!imageBuffer" width="600px" height="400px" class="imageview mt" xmlns="http://www.w3.org/2000/svg"
+            role="img" preserveAspectRatio="xMidYMid slice" focusable="false">
             <title>Placeholder</title>
             <rect width="100%" height="100%" fill="#868e96"></rect>
             <text x="50%" y="50%" fill="#dee2e6" font-size="3em" text-anchor="middle" dominant-baseline="middle">Ctrl+V
                 粘贴剪贴板图片
             </text>
         </svg>
-        <img :src="readFileAsDataURL(imageBuffer)" x-show="imageBuffer" class="imageview">
+        <img :src="readFileAsDataURL(imageBuffer)" x-show="imageBuffer" class="imageview mt">
     </div>
 
-    <input type="file" id="formFile" accept="image/jpeg,image/png,image/gif,image/webp" @change="fileInputChange">
-    <button type="button" @click="actionUpload" :disabled="!imageBuffer">上传</button>
-    <button type="button" @click="actionPaste" :disabled="!navigator.clipboard">粘贴</button>
+    <div class="status-msg mt" x-text="statusMsg"></div>
+
+    <div class="mt">
+        <input type="file" id="formFile" accept="image/jpeg,image/png,image/gif,image/webp" autocomplete="off"
+            @change="fileInputChange">
+        <button type="button" @click="actionUpload" :disabled="!imageBuffer">上传</button>
+        <button type="button" @click="actionPaste" :disabled="!navigator.clipboard">粘贴</button>
+    </div>
 
 </div>
 
@@ -36,16 +41,22 @@
     function data() {
         return {
             imageBuffer: null,
+            statusMsg: '就绪',
             fileInputChange: function (event) {
                 const file = event.target.files[0];
-                if (file) {
-                    this.imageBuffer = file;
-                    this.imageChange();
-                }
+                if (file) this.setImageBuffer(file);
             },
-            imageChange: async function () {
-                if (this.imageBuffer && (this.imageBuffer.type == 'image/jpeg' || this.imageBuffer.type == 'image/png'))
-                    this.imageBuffer = await webpConverterBrowser.blobToWebP(this.imageBuffer)
+            setImageBuffer: async function (file) {
+                if (file) {
+                    if (file.type == 'image/jpeg' || file.type == 'image/png') {
+                        this.statusMsg = '转换WebP...';
+                        this.imageBuffer = await webpConverterBrowser.blobToWebP(file);
+                        this.statusMsg = `就绪，${formatBytes(file.size)} => ${formatBytes(this.imageBuffer.size)}。`;
+                    } else {
+                        this.imageBuffer = file;
+                        this.statusMsg = `就绪，${formatBytes(file.size)}。`;
+                    }
+                }
             },
             actionUpload: function () {
                 if (!this.imageBuffer) return;
@@ -65,8 +76,7 @@
                         const imageTypes = clipboardItem.types.filter(type => type.startsWith('image/'))
                         for (const imageType of imageTypes) {
                             const blob = await clipboardItem.getType(imageType);
-                            this.imageBuffer = blob;
-                            this.imageChange();
+                            this.setImageBuffer(blob);
                         }
                     }
                 } catch (err) {
