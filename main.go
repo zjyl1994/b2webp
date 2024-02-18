@@ -84,6 +84,11 @@ func errMain() (err error) {
 		return err
 	}
 
+	if val := vars.Getenv("B2WEBP_UPLOAD_PASSWORD"); len(val) > 0 {
+		vars.UploadPassword = val
+		logrus.Infoln("Upload password enabled with environment variables 'B2WEBP_UPLOAD_PASSWORD'.")
+	}
+
 	vars.CronInstance = cron.New()
 	vars.CronInstance.AddFunc("@daily", func() {
 		if err := service.FileCacheService.Clean(); err != nil {

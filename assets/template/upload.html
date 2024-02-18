@@ -1,6 +1,11 @@
 <div id="main" x-data="data()" @keydown.window.ctrl.v="actionPaste" @keydown.window.enter="actionUpload"
     data-title="{{.site_name}}" data-navi="upload">
 
+    <blockquote class="mt">
+        已托管图片 {{.total_count}} 张，
+        总容量 <span data-render-text="formatBytes({{.total_size}})"></span>。
+    </blockquote>
+
     <div class="mt">
         <svg x-show="!loading && !imageBuffer" width="600px" height="400px" class="imagesize"
             xmlns="http://www.w3.org/2000/svg" role="img" preserveAspectRatio="xMidYMid slice" focusable="false">
@@ -26,6 +31,10 @@
     </div>
 
     <div class="mt">
+        {{if .need_password}}
+        <label for="uploadPassword">上传密码<span style="color: red;">*</span></label>
+        <input type="password" x-model="uploadPassword" id="uploadPassword" required>
+        {{end}}
         <input type="file" id="formFile" accept="image/jpeg,image/png,image/gif,image/webp" autocomplete="off"
             @change="fileInputChange">
         <button type="button" @click="actionUpload" :disabled="!imageBuffer">上传</button>
@@ -54,6 +63,7 @@
             imageBuffer: null,
             statusMsg: '',
             loading: false,
+            uploadPassword: '',
             fileInputChange: function (event) {
                 const file = event.target.files[0];
                 if (file) this.setImageBuffer(file);
@@ -76,16 +86,23 @@
             actionUpload: function () {
                 if (!this.imageBuffer) return;
                 const formData = new FormData();
+                formData.append('password', this.uploadPassword);
                 formData.append('image', this.imageBuffer);
                 fetch('/upload', {
                     method: 'POST',
                     body: formData,
                 }).then(response => response.json())
-                    .then(data => window.location = data.info_page)
+                    .then(data => {
+                        if (data.success) {
+                            window.location = data.data.info_page;
+                        } else {
+                            this.statusMsg = '错误：' + data.error;
+                        }
+                    })
                     .catch(e => this.statusMsg = '错误：' + e.message);
             },
             actionPaste: async function () {
-                if (!navigator.clipboard){
+                if (!navigator.clipboard) {
                     this.statusMsg = '错误：浏览器限制，无法粘贴。';
                     return;
                 }

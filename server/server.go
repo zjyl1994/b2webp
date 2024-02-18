@@ -52,6 +52,7 @@ func Run(listen string) error {
 		c.Locals("site_name", vars.Getenv("B2WEBP_SITE_NAME"))
 		c.Locals("total_count", vars.TotalImageCount)
 		c.Locals("total_size", vars.TotalImageSize)
+		c.Locals("need_password", len(vars.UploadPassword) > 0)
 		return c.Next()
 	})
 

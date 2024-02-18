@@ -1,6 +1,7 @@
 package server
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"net/url"
@@ -28,41 +29,45 @@ func UploadImagePage(c *fiber.Ctx) error {
 }
 
 func UploadImageHandler(c *fiber.Ctx) error {
+	if vars.UploadPassword != c.FormValue("password") {
+		return jsonResult(c, nil, errors.New("上传密码不正确"))
+	}
+
 	fh, err := c.FormFile("image")
 	if err != nil {
-		return err
+		return jsonResult(c, nil, err)
 	}
 
 	contentMD5, err := utils.CalcMultipartFileHeaderContentMD5(fh)
 	if err != nil {
-		return err
+		return jsonResult(c, nil, err)
 	}
 	fileName := utils.Base64ToUrlSafe(contentMD5)
 	contentType := fh.Header.Get("Content-Type")
 	if !utils.Contains(contentType, []string{"image/jpeg", "image/gif", "image/png", "image/webp"}) {
-		return fiber.ErrUnsupportedMediaType
+		return jsonResult(c, nil, errors.New("不支持的文件类型"))
 	}
 
 	sameFileCount, err := service.ImageService.CountHash(contentMD5)
 	if err != nil {
-		return err
+		return jsonResult(c, nil, err)
 	}
 
 	if sameFileCount == 0 {
 		cacheFile := service.FileCacheService.GetPath(fileName)
 
 		if err = c.SaveFile(fh, cacheFile); err != nil {
-			return err
+			return jsonResult(c, nil, err)
 		}
 
 		if err = service.S3Service.Put(cacheFile, fileName, contentType, contentMD5); err != nil {
-			return err
+			return jsonResult(c, nil, err)
 		}
 	}
 
 	image, err := service.ImageService.Create(contentType, contentMD5, uint64(fh.Size))
 	if err != nil {
-		return err
+		return jsonResult(c, nil, err)
 	}
 
 	atomic.AddInt64(&vars.TotalImageCount, 1)
@@ -70,9 +75,9 @@ func UploadImageHandler(c *fiber.Ctx) error {
 
 	renderItem, err := image2RenderItem(image)
 	if err != nil {
-		return err
+		return jsonResult(c, nil, err)
 	}
-	return c.JSON(renderItem)
+	return jsonResult(c, renderItem, nil)
 }
 
 func DeleteImageHandler(c *fiber.Ctx) error {
@@ -235,4 +240,12 @@ func image2RenderItem(image *models.Image) (imageRenderItem, error) {
 		UploadTime:  image.UploadTime,
 		FileHash:    image.FileHash,
 	}, nil
+}
+
+func jsonResult(c *fiber.Ctx, data any, err error) error {
+	if err != nil {
+		return c.JSON(fiber.Map{"success": false, "error": err.Error()})
+	} else {
+		return c.JSON(fiber.Map{"success": true, "data": data})
+	}
 }

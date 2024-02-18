@@ -1,4 +1,6 @@
-<div id="main" data-title="{{.status_code}}">
+<div id="main" data-title="{{.status_code}} {{.status_text}}">
+  <hr>
   <h1>{{.status_code}} {{.status_text}}</h1>
   <p>{{.error_message}}</p>
+  <button onclick="window.history.go(-1); return false;">返回</button>
 </div>

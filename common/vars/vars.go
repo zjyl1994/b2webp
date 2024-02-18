@@ -28,6 +28,8 @@ var (
 
 	TotalImageCount int64
 	TotalImageSize  int64
+
+	UploadPassword string
 )
 
 func Getenv(name string) string {
