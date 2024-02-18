@@ -1,11 +1,21 @@
+:root {
+    --shadow-color: #DADADD;
+    --light-color: #70777f;
+    --focus-color: rgba(37, 152, 184, 0.67);
+}
+
+.container {
+    padding: .25em .25em;
+}
+
 .imagesize {
     max-width: 600px;
     max-height: 600px;
 }
 
-.imageview{
+.imageview {
     border: solid 1px;
-    box-shadow: 6px 6px 3px 0px #DADADD;
+    box-shadow: 6px 6px 3px 0px var(--shadow-color);
 }
 
 .copy-text {
@@ -22,6 +32,15 @@
     margin-top: 1em;
 }
 
+.light-text {
+    color: var(--light-color);
+}
+
+.focus-line {
+    border-left: 4px solid var(--focus-color);
+    padding-left: .5em;
+}
+
 /* from https://loading.io/css */
 .lds-facebook {
     display: inline-block;
@@ -35,7 +54,7 @@
     position: absolute;
     left: 8px;
     width: 16px;
-    background: #DADADD;
+    background: var(--shadow-color);
     animation: lds-facebook 1.2s cubic-bezier(0, 0.5, 0.5, 1) infinite;
 }
 

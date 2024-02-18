@@ -1,10 +1,10 @@
-<div id="main" x-data="data()" @keydown.window.ctrl.v="actionPaste" @keydown.window.enter="actionUpload"
-    data-title="{{.site_name}}" data-navi="upload">
+<div id="main" x-data="data()" x-init="initdata" @keydown.window.ctrl.v="actionPaste"
+    @keydown.window.enter="actionUpload" data-title="{{.site_name}}" data-navi="upload">
 
-    <blockquote class="mt">
+    <div class="light-text focus-line mt">
         已托管图片 {{.total_count}} 张，
         总容量 <span data-render-text="formatBytes({{.total_size}})"></span>。
-    </blockquote>
+    </div>
 
     <div class="mt">
         <svg x-show="!loading && !imageBuffer" width="600px" height="400px" class="imagesize"
@@ -41,6 +41,18 @@
         <button type="button" @click="actionPaste" :disabled="!navigator.clipboard">粘贴</button>
     </div>
 
+    <template x-if="history">
+        <div class="mt">
+            <hr>
+            <h2>上传历史</h2>
+            <ol>
+                <template x-for="item in history">
+                    <li><a :href="item" x-text="item"></a></li>
+                </template>
+            </ol>
+            <button type="button" @click="actionCleanHistory">清空</button>
+        </div>
+    </template>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"
@@ -56,6 +68,18 @@
             fr.onerror = reject;
             fr.readAsDataURL(file);
         })
+    }
+
+    function push2localstorage(key, value, cap) {
+        var new_list = [value];
+        var old_list = JSON.parse(localStorage.getItem(key));
+        if (old_list) {
+            if (old_list.length >= cap) {
+                old_list = old_list.slice(0, cap - 1);
+            }
+            new_list.push.apply(new_list, old_list)
+        }
+        localStorage.setItem(key, JSON.stringify(new_list));
     }
 
     function data() {
@@ -94,6 +118,8 @@
                 }).then(response => response.json())
                     .then(data => {
                         if (data.success) {
+                            push2localstorage('infoPages', data.data.info_page, 30);
+                            push2localstorage('delLinks', data.data.delete_link, 30);
                             window.location = data.data.info_page;
                         } else {
                             this.statusMsg = '错误：' + data.error;
@@ -118,6 +144,14 @@
                 } catch (err) {
                     this.statusMsg = '错误：' + err.message;
                 }
+            },
+            actionCleanHistory: function () {
+                localStorage.removeItem('infoPages');
+                localStorage.removeItem('delLinks');
+                this.history = null;
+            },
+            initdata: function () {
+                this.history = JSON.parse(localStorage.getItem('infoPages'));
             }
         }
     }
