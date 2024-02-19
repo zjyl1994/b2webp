@@ -25,7 +25,12 @@ const (
 )
 
 func UploadImagePage(c *fiber.Ctx) error {
-	return c.Render("upload", fiber.Map{})
+	return c.Render("upload", fiber.Map{
+		"motd":          vars.Motd,
+		"total_count":   vars.TotalImageCount,
+		"total_size":    vars.TotalImageSize,
+		"need_password": len(vars.UploadPassword) > 0,
+	})
 }
 
 func UploadImageHandler(c *fiber.Ctx) error {

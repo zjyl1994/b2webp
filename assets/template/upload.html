@@ -2,8 +2,11 @@
     @keydown.window.enter="actionUpload" data-title="{{.site_name}}" data-navi="upload">
 
     <div class="light-text focus-line mt">
-        已托管图片 {{.total_count}} 张，
-        共 <span data-render-text="formatBytes({{.total_size}})"></span>。
+        {{if .motd}}<div>{{.motd}}</div>{{end}}
+        <div>
+            已托管图片 {{.total_count}} 张，
+            共 <span data-render-text="formatBytes({{.total_size}})"></span>。
+        </div>
     </div>
 
     <div class="mt">
@@ -55,10 +58,8 @@
     </template>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"
-    integrity="sha256-yPqP9Fer3NIS83oH7y8pLJmQEd/6vKpXf7Hh4Adsplg=" crossorigin="anonymous" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/webp-converter-browser@1.0.4/dist/index.min.js"
-    integrity="sha256-IT8niI4YP/XLmcASezo2vA7MC8KaAj7CxhZVeR6Wcx0=" crossorigin="anonymous"></script>
+<script src="{{.cdn_prefix}}/alpinejs@3.13.3/dist/cdn.min.js" defer></script>
+<script src="{{.cdn_prefix}}/webp-converter-browser@1.0.4/dist/index.min.js"></script>
 <script>
     const MAX_HISTORY_ITEM = 30;
     function readFileAsDataURL(file) {

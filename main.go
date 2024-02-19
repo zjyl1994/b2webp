@@ -63,6 +63,9 @@ func errMain() (err error) {
 	}
 	logrus.Debugln("Cache path", vars.CacheDir)
 
+	vars.CdnAssetsPrefix = vars.Getenv("B2WEBP_CDN_ASSETS_PREFIX")
+	vars.Motd = vars.Getenv("B2WEBP_MOTD")
+
 	if maxCacheSize, err := bytesize.Parse(strings.ToUpper(vars.Getenv("B2WEBP_S3_MAX_CACHE_SIZE"))); err != nil {
 		return err
 	} else {

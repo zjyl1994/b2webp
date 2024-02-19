@@ -50,9 +50,7 @@ func Run(listen string) error {
 	app.Use(favicon.New(favicon.Config{Data: assets.Favicon}))
 	app.Use(func(c *fiber.Ctx) error {
 		c.Locals("site_name", vars.Getenv("B2WEBP_SITE_NAME"))
-		c.Locals("total_count", vars.TotalImageCount)
-		c.Locals("total_size", vars.TotalImageSize)
-		c.Locals("need_password", len(vars.UploadPassword) > 0)
+		c.Locals("cdn_prefix", vars.CdnAssetsPrefix)
 		return c.Next()
 	})
 

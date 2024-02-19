@@ -22,5 +22,5 @@ var defaultEnvVar = map[string]string{
 	"B2WEBP_S3_MAX_CACHE_SIZE": "500MB",
 	"B2WEBP_MEMORY_CACHE_SIZE": "50MB",
 	"B2WEBP_ASSETS_PATH":       "assets",
-	"B2WEBP_GUEST_UPLOAD":      "true",
+	"B2WEBP_CDN_ASSETS_PREFIX": "https://cdn.jsdelivr.net/npm",
 }
