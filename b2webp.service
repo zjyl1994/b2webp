@@ -8,6 +8,7 @@ Restart=always
 Type=simple
 ExecStart=/usr/local/bin/b2webp
 EnvironmentFile=/etc/b2webp.env
+WorkingDirectory=/opt/b2webp
 
 [Install]
 WantedBy=multi-user.target
