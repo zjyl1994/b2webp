@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"net/url"
 	"os"
+	"strings"
 	"sync/atomic"
 	"time"
 
@@ -26,7 +27,7 @@ const (
 
 func UploadImagePage(c *fiber.Ctx) error {
 	return c.Render("upload", fiber.Map{
-		"motd":          vars.Motd,
+		"motd":          template.HTML(strings.ReplaceAll(vars.Motd, `\n`, "<br>")),
 		"total_count":   vars.TotalImageCount,
 		"total_size":    vars.TotalImageSize,
 		"need_password": len(vars.UploadPassword) > 0,
@@ -86,9 +87,11 @@ func UploadImageHandler(c *fiber.Ctx) error {
 }
 
 func DeleteImageHandler(c *fiber.Ctx) error {
-	hashid := c.Params("hashid")
-	hashid = utils.BareFilename(hashid)
-	image, err := service.ImageService.GetCachedInfo(hashid)
+	imageId := parseHashId(c.Params("hashid"))
+	if imageId == 0 {
+		return fiber.ErrNotFound
+	}
+	image, err := service.ImageService.GetCachedInfo(imageId)
 	if err != nil {
 		return err
 	}
@@ -121,13 +124,17 @@ func DeleteImageHandler(c *fiber.Ctx) error {
 			return err
 		}
 	}
+	atomic.AddInt64(&vars.TotalImageCount, -1)
+	atomic.AddInt64(&vars.TotalImageSize, -int64(image.FileSize))
 	return fiber.NewError(fiber.StatusOK, "图片已成功删除")
 }
 
 func GetImagePage(c *fiber.Ctx) error {
-	hashid := c.Params("hashid")
-	hashid = utils.BareFilename(hashid)
-	image, err := service.ImageService.GetCachedInfo(hashid)
+	imageId := parseHashId(c.Params("hashid"))
+	if imageId == 0 {
+		return fiber.ErrNotFound
+	}
+	image, err := service.ImageService.GetCachedInfo(imageId)
 	if err != nil {
 		return err
 	}
@@ -146,9 +153,12 @@ func GetImagePage(c *fiber.Ctx) error {
 }
 
 func GetImageHandler(c *fiber.Ctx) error {
-	hashid := c.Params("hashid")
-	hashid = utils.BareFilename(hashid)
-	image, err := service.ImageService.GetCachedInfo(hashid)
+	hashId := c.Params("hashid")
+	imageId := parseHashId(hashId)
+	if imageId == 0 {
+		return fiber.ErrNotFound
+	}
+	image, err := service.ImageService.GetCachedInfo(imageId)
 	if err != nil {
 		return err
 	}
@@ -162,7 +172,7 @@ func GetImageHandler(c *fiber.Ctx) error {
 		return sendImage(c, image, cacheFile)
 	}
 
-	_, err, _ = s3fetch.Do(hashid, func() (interface{}, error) {
+	_, err, _ = s3fetch.Do(hashId, func() (interface{}, error) {
 		return nil, service.S3Service.Get(fileName, cacheFile)
 	})
 	if err != nil {
@@ -253,4 +263,13 @@ func jsonResult(c *fiber.Ctx, data any, err error) error {
 	} else {
 		return c.JSON(fiber.Map{"success": true, "data": data})
 	}
+}
+
+func parseHashId(s string) uint64 {
+	hashid := utils.BareFilename(s)
+	i64Arr, err := vars.HashId.DecodeInt64WithError(hashid)
+	if err != nil {
+		return 0
+	}
+	return uint64(i64Arr[0])
 }

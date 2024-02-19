@@ -2,6 +2,7 @@ package utils
 
 import (
 	"math/rand"
+	"strconv"
 	"strings"
 
 	"github.com/inhies/go-bytesize"
@@ -34,4 +35,12 @@ func RandString(length int) string {
 
 func ByteSizeStr(b int64) string {
 	return bytesize.ByteSize(b).String()
+}
+
+func MustParseInt64(s string) int64 {
+	if i, err := strconv.ParseInt(s, 10, 64); err != nil {
+		return 0
+	} else {
+		return i
+	}
 }

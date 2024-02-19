@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"strconv"
 
 	"github.com/bytedance/sonic"
 	"github.com/sirupsen/logrus"
@@ -20,13 +21,9 @@ var ImageService imageService
 
 type imageService struct{}
 
-func (s imageService) GetInfo(hashid string) (*models.Image, error) {
-	i64Arr, err := vars.HashId.DecodeInt64WithError(hashid)
-	if err != nil {
-		return nil, nil
-	}
+func (s imageService) GetInfo(id uint64) (*models.Image, error) {
 	var image models.Image
-	err = vars.Database.First(&image, i64Arr[0]).Error
+	err := vars.Database.First(&image, id).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -36,8 +33,8 @@ func (s imageService) GetInfo(hashid string) (*models.Image, error) {
 	return &image, nil
 }
 
-func (s imageService) GetCachedInfo(hashid string) (m *models.Image, err error) {
-	cacheKey := []byte("imginfo" + hashid)
+func (s imageService) GetCachedInfo(id uint64) (m *models.Image, err error) {
+	cacheKey := []byte("imginfo" + strconv.FormatUint(id, 10))
 
 	if val, err := vars.MemoryCache.Get(cacheKey); err == nil {
 		err = sonic.Unmarshal(val, &m)
@@ -47,8 +44,8 @@ func (s imageService) GetCachedInfo(hashid string) (m *models.Image, err error) 
 		return m, err
 	}
 
-	content, err, _ := imageInfoSf.Do(hashid, func() (interface{}, error) {
-		return s.GetInfo(hashid)
+	content, err, _ := imageInfoSf.Do(string(cacheKey), func() (interface{}, error) {
+		return s.GetInfo(id)
 	})
 	if err != nil {
 		return nil, err
@@ -67,11 +64,17 @@ func (s imageService) GetCachedInfo(hashid string) (m *models.Image, err error) 
 }
 
 func (s imageService) Delete(id uint64) error {
-	return vars.Database.Delete(&models.Image{}, id).Error
+	err := vars.Database.Delete(&models.Image{}, id).Error
+	if err != nil {
+		return err
+	}
+	cacheKey := []byte("imginfo" + strconv.FormatUint(id, 10))
+	vars.MemoryCache.Del(cacheKey)
+	return nil
 }
 
-func (s imageService) CountHash(hash string) (count int64, err error) {
-	err = vars.Database.Model(&models.Image{}).Where("file_hash = ?", hash).Count(&count).Error
+func (s imageService) CountHash(fileHash string) (count int64, err error) {
+	err = vars.Database.Model(&models.Image{}).Where("file_hash = ?", fileHash).Count(&count).Error
 	return count, err
 }
 

@@ -1,11 +1,9 @@
 :root {
     --shadow-color: #DADADD;
-    --light-color: #70777f;
-    --focus-color: rgba(37, 152, 184, 0.67);
 }
 
 .container {
-    padding: .25em .25em;
+    padding: .25em;
 }
 
 .imagesize {
@@ -32,17 +30,17 @@
     margin-top: 1em;
 }
 
-.py{
+.py {
     padding-top: .25em;
     padding-bottom: .25em;
 }
 
-.light-text {
-    color: var(--light-color);
+.italic-text {
+    font-style: italic;
 }
 
 .focus-line {
-    border-left: 4px solid var(--focus-color);
+    border-left: 4px solid var(--focus);
     padding-left: .5em;
 }
 
