@@ -1,0 +1,13 @@
+[Unit]
+Description=B2 WebP image host server
+After=network.target
+Wants=network-online.target
+
+[Service]
+Restart=always
+Type=simple
+ExecStart=/usr/local/bin/b2webp
+EnvironmentFile=/etc/b2webp.env
+
+[Install]
+WantedBy=multi-user.target
