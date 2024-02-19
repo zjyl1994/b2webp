@@ -1,13 +1,11 @@
 <div id="main" x-data="data()" x-init="initdata" @keydown.window.ctrl.v="actionPaste"
     @keydown.window.enter="actionUpload" data-title="{{.site_name}}" data-navi="upload">
 
+    {{if .motd}}
     <blockquote class="mt">
-        {{if .motd}}<p>{{.motd}}</p>{{end}}
-        <p>
-            已托管图片 {{.total_count}} 张，
-            共 <span data-render-text="formatBytes({{.total_size}})"></span>。
-        </p>
+        {{.motd}}
     </blockquote>
+    {{end}}
 
     <div class="mt">
         <svg x-show="!loading && !imageBuffer" class="imagesize" xmlns="http://www.w3.org/2000/svg" role="img"

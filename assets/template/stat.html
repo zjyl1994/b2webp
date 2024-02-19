@@ -1,0 +1,38 @@
+<div id="main" data-title="统计信息">
+    <table class="mt">
+        <tbody>
+            <tr>
+                <th>启动时间</th>
+                <td data-render-text="timestamp2str({{.boot_time}})"></td>
+            </tr>
+            <tr>
+                <th>启动至今</th>
+                <td>{{.boot_since}}</td>
+            </tr>
+            <tr>
+                <th>启动至今图片点击</th>
+                <td>{{.click_counter}}</td>
+            </tr>
+            <tr>
+                <th>启动至今图片流量</th>
+                <td data-render-text="formatBytes({{.byte_counter}})"></td>
+            </tr>
+            <tr>
+                <th>托管图片总数</th>
+                <td>{{.total_count}}</td>
+            </tr>
+            <tr>
+                <th>托管图片总容量</th>
+                <td data-render-text="formatBytes({{.total_size}})"></td>
+            </tr>
+            <tr>
+                <th>图片存储总数</th>
+                <td>{{.real_count}}</td>
+            </tr>
+            <tr>
+                <th>图片存储总容量</th>
+                <td data-render-text="formatBytes({{.real_size}})"></td>
+            </tr>
+        </tbody>
+    </table>
+</div>

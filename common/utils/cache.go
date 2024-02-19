@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"encoding/json"
+	"github.com/bytedance/sonic"
 
 	"github.com/coocood/freecache"
 	"golang.org/x/sync/singleflight"
@@ -12,7 +12,7 @@ func CacheGet[T any](cache *freecache.Cache, sf *singleflight.Group, key string,
 	cacheKey := []byte(key)
 
 	if val, err := cache.Get(cacheKey); err == nil {
-		if err = json.Unmarshal(val, &data); err == nil {
+		if err = sonic.Unmarshal(val, &data); err == nil {
 			return data, nil
 		}
 	}
@@ -23,7 +23,7 @@ func CacheGet[T any](cache *freecache.Cache, sf *singleflight.Group, key string,
 	}
 	data = result.(T)
 
-	if bjson, err := json.Marshal(data); err == nil {
+	if bjson, err := sonic.Marshal(data); err == nil {
 		cache.Set(cacheKey, bjson, ttl)
 	}
 

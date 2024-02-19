@@ -57,6 +57,7 @@ func Run(listen string) error {
 	app.Use("/static", filesystem.New(filesystem.Config{Root: assets.GetFS("static")}))
 
 	app.Get("/test", testHandler)
+	app.Get("/stat", GetStatPage)
 
 	app.Get("/", UploadImagePage)
 	app.Get("/upload", UploadImagePage)

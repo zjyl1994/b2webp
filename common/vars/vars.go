@@ -2,6 +2,7 @@ package vars
 
 import (
 	"os"
+	"sync/atomic"
 	"time"
 
 	"github.com/coocood/freecache"
@@ -26,12 +27,11 @@ var (
 	MemoryCache  *freecache.Cache
 	CronInstance *cron.Cron
 
-	TotalImageCount int64
-	TotalImageSize  int64
-
-	UploadPassword  string
-	CdnAssetsPrefix string
-	Motd            string
+	UploadPassword    string
+	CdnAssetsPrefix   string
+	Motd              string
+	ServeByteCounter  atomic.Uint64
+	ServeClickCounter atomic.Uint64
 )
 
 func Getenv(name string) string {

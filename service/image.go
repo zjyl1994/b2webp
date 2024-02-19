@@ -4,8 +4,6 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/bytedance/sonic"
-	"github.com/sirupsen/logrus"
 	"github.com/zjyl1994/b2webp/common/models"
 	"github.com/zjyl1994/b2webp/common/utils"
 	"github.com/zjyl1994/b2webp/common/vars"
@@ -15,7 +13,7 @@ import (
 
 var imageInfoSf singleflight.Group
 
-const IMAGE_INFO_CACHE_TTL = 3
+const IMAGE_INFO_CACHE_TTL = 5
 
 var ImageService imageService
 
@@ -34,33 +32,9 @@ func (s imageService) GetInfo(id uint64) (*models.Image, error) {
 }
 
 func (s imageService) GetCachedInfo(id uint64) (m *models.Image, err error) {
-	cacheKey := []byte("imginfo" + strconv.FormatUint(id, 10))
-
-	if val, err := vars.MemoryCache.Get(cacheKey); err == nil {
-		err = sonic.Unmarshal(val, &m)
-		if err != nil {
-			logrus.Errorln(err)
-		}
-		return m, err
-	}
-
-	content, err, _ := imageInfoSf.Do(string(cacheKey), func() (interface{}, error) {
+	return utils.CacheGet(vars.MemoryCache, &imageInfoSf, "imginfo"+strconv.FormatUint(id, 10), func() (*models.Image, error) {
 		return s.GetInfo(id)
-	})
-	if err != nil {
-		return nil, err
-	}
-	m = content.(*models.Image)
-
-	cacheData, err := sonic.Marshal(m)
-	if err == nil {
-		if err = vars.MemoryCache.Set(cacheKey, cacheData, IMAGE_INFO_CACHE_TTL); err != nil {
-			logrus.Errorln(err)
-		}
-	} else {
-		logrus.Errorln(err)
-	}
-	return m, nil
+	}, IMAGE_INFO_CACHE_TTL)
 }
 
 func (s imageService) Delete(id uint64) error {
@@ -114,4 +88,34 @@ func (s imageService) RealTotalSize() (count int64, err error) {
 	err = vars.Database.Table("(?) as u", vars.Database.Model(&models.Image{}).Select("file_size").
 		Group("file_hash")).Select("SUM(file_size) as file_size").First(&result).Error
 	return result.FileSize, err
+}
+
+type StatInfo struct {
+	TotalCount        int64
+	RealTotalCount    int64
+	TotalFileSize     int64
+	RealTotalFileSize int64
+}
+
+func (s imageService) GetCachedStat() (stat *StatInfo, err error) {
+	return utils.CacheGet(vars.MemoryCache, &imageInfoSf, "statinfo", func() (result *StatInfo, err error) {
+		result = new(StatInfo)
+		result.TotalCount, err = s.TotalCount()
+		if err != nil {
+			return nil, err
+		}
+		result.TotalFileSize, err = s.TotalSize()
+		if err != nil {
+			return nil, err
+		}
+		result.RealTotalCount, err = s.RealTotalCount()
+		if err != nil {
+			return nil, err
+		}
+		result.RealTotalFileSize, err = s.RealTotalSize()
+		if err != nil {
+			return nil, err
+		}
+		return result, nil
+	}, IMAGE_INFO_CACHE_TTL)
 }

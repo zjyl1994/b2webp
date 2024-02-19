@@ -7,7 +7,6 @@ import (
 	"net/url"
 	"os"
 	"strings"
-	"sync/atomic"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -28,8 +27,6 @@ const (
 func UploadImagePage(c *fiber.Ctx) error {
 	return c.Render("upload", fiber.Map{
 		"motd":          template.HTML(strings.ReplaceAll(vars.Motd, `\n`, "<br>")),
-		"total_count":   vars.TotalImageCount,
-		"total_size":    vars.TotalImageSize,
 		"need_password": len(vars.UploadPassword) > 0,
 	})
 }
@@ -76,9 +73,6 @@ func UploadImageHandler(c *fiber.Ctx) error {
 		return jsonResult(c, nil, err)
 	}
 
-	atomic.AddInt64(&vars.TotalImageCount, 1)
-	atomic.AddInt64(&vars.TotalImageSize, fh.Size)
-
 	renderItem, err := image2RenderItem(image)
 	if err != nil {
 		return jsonResult(c, nil, err)
@@ -124,8 +118,6 @@ func DeleteImageHandler(c *fiber.Ctx) error {
 			return err
 		}
 	}
-	atomic.AddInt64(&vars.TotalImageCount, -1)
-	atomic.AddInt64(&vars.TotalImageSize, -int64(image.FileSize))
 	return fiber.NewError(fiber.StatusOK, "图片已成功删除")
 }
 
@@ -183,25 +175,26 @@ func GetImageHandler(c *fiber.Ctx) error {
 }
 
 func sendImage(c *fiber.Ctx, image *models.Image, filename string) error {
+	sendFile := func(filename string) error {
+		vars.ServeByteCounter.Add(image.FileSize)
+		vars.ServeClickCounter.Add(1)
+		now := time.Now()
+		os.Chtimes(filename, now, now)
+		c.Set(fiber.HeaderCacheControl, IMAGE_CACHE_CONTROL)
+		return c.SendFile(filename)
+	}
 	if utils.Contains(image.ContentType, []string{"image/jpeg", "image/png"}) &&
 		c.Accepts("image/webp") == "image/webp" {
 		webpFile := utils.ChangeExtname(filename, ".webp")
 		if !utils.FileExist(webpFile) {
 			if err := service.Convert2Webp(filename, webpFile); err != nil {
 				logrus.Errorln(err)
-				return sendImageFile(c, filename)
+				return sendFile(filename)
 			}
 		}
-		return sendImageFile(c, webpFile)
+		return sendFile(webpFile)
 	}
-	return sendImageFile(c, filename)
-}
-
-func sendImageFile(c *fiber.Ctx, filename string) error {
-	now := time.Now()
-	os.Chtimes(filename, now, now)
-	c.Set(fiber.HeaderCacheControl, IMAGE_CACHE_CONTROL)
-	return c.SendFile(filename)
+	return sendFile(filename)
 }
 
 type imageRenderItem struct {
@@ -272,4 +265,23 @@ func parseHashId(s string) uint64 {
 		return 0
 	}
 	return uint64(i64Arr[0])
+}
+
+func GetStatPage(c *fiber.Ctx) error {
+	statInfo, err := service.ImageService.GetCachedStat()
+	if err != nil {
+		return err
+	}
+	byteCounter := vars.ServeByteCounter.Load()
+	clickCounter := vars.ServeClickCounter.Load()
+	return c.Render("stat", fiber.Map{
+		"total_count":   statInfo.TotalCount,
+		"real_count":    statInfo.RealTotalCount,
+		"total_size":    statInfo.TotalFileSize,
+		"real_size":     statInfo.RealTotalFileSize,
+		"byte_counter":  byteCounter,
+		"click_counter": clickCounter,
+		"boot_time":     vars.BootTime.Unix(),
+		"boot_since":    time.Since(vars.BootTime).Truncate(time.Second).String(),
+	})
 }
