@@ -1,13 +1,13 @@
 <div id="main" x-data="data()" x-init="initdata" @keydown.window.ctrl.v="actionPaste"
     @keydown.window.enter="actionUpload" data-title="{{.site_name}}" data-navi="upload">
 
-    <div class="focus-line mt">
-        {{if .motd}}<div class="italic-text">{{.motd}}</div>{{end}}
-        <div>
+    <blockquote class="mt">
+        {{if .motd}}<p>{{.motd}}</p>{{end}}
+        <p>
             已托管图片 {{.total_count}} 张，
             共 <span data-render-text="formatBytes({{.total_size}})"></span>。
-        </div>
-    </div>
+        </p>
+    </blockquote>
 
     <div class="mt">
         <svg x-show="!loading && !imageBuffer" class="imagesize" xmlns="http://www.w3.org/2000/svg" role="img"
@@ -46,8 +46,8 @@
     {{end}}
 
     <div class="mt">   
-        <button type="button" @click="actionUpload" :disabled="!imageBuffer">上传</button>
-        <button type="button" @click="actionPaste" :disabled="!navigator.clipboard">粘贴</button>
+        <button type="button" class="button button-outline" @click="actionUpload" :disabled="!imageBuffer">上传</button>
+        <button type="button" class="button button-outline" @click="actionPaste" :disabled="!navigator.clipboard">粘贴</button>
     </div>
 
     <template x-if="history">
@@ -59,7 +59,7 @@
                     <li><a :href="item" x-text="item"></a></li>
                 </template>
             </ol>
-            <button type="button" @click="actionCleanHistory">清空</button>
+            <button type="button" class="button button-outline" @click="actionCleanHistory">清空</button>
         </div>
     </template>
 </div>
