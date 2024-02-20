@@ -65,7 +65,7 @@
 <script src="{{.cdn_prefix}}/alpinejs@3.13.3/dist/cdn.min.js" defer></script>
 <script src="{{.cdn_prefix}}/webp-converter-browser@1.0.4/dist/index.min.js"></script>
 <script>
-    const MAX_HISTORY_ITEM = 30;
+    const MAX_HISTORY_ITEM = 50;
     function readFileAsDataURL(file) {
         if (!file) return '';
         return new Promise((resolve, reject) => {
@@ -124,9 +124,8 @@
                 }).then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            push2localstorage('infoPages', data.data.info_page, MAX_HISTORY_ITEM);
-                            push2localstorage('delLinks', data.data.delete_link, MAX_HISTORY_ITEM);
-                            window.location = data.data.info_page;
+                            push2localstorage('adminPages', data.data.admin_page, MAX_HISTORY_ITEM);
+                            window.location = data.data.admin_page;
                         } else {
                             this.statusMsg = '错误：' + data.error;
                         }
@@ -152,12 +151,11 @@
                 }
             },
             actionCleanHistory: function () {
-                localStorage.removeItem('infoPages');
-                localStorage.removeItem('delLinks');
+                localStorage.removeItem('adminPages');
                 this.history = null;
             },
             initdata: function () {
-                this.history = JSON.parse(localStorage.getItem('infoPages'));
+                this.history = JSON.parse(localStorage.getItem('adminPages'));
             }
         }
     }

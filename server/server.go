@@ -65,7 +65,7 @@ func Run(listen string) error {
 	app.Get("/delete/:hashid/:delcode", DeleteImageHandler)
 
 	app.Get("/:hashid", GetImageHandler)
-	app.Get("/info/:hashid", GetImagePage)
+	app.Get("/info/:hashid/:code?", GetImagePage)
 
 	return app.Listen(listen)
 }

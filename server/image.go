@@ -139,8 +139,9 @@ func GetImagePage(c *fiber.Ctx) error {
 		return err
 	}
 	return c.Render("info", fiber.Map{
-		"info": renderItem,
-		"img":  template.URL(renderItem.ImageURL),
+		"info":  renderItem,
+		"img":   template.URL(renderItem.ImageURL),
+		"admin": c.Params("code") == image.DeleteCode,
 	})
 }
 
@@ -200,6 +201,7 @@ func sendImage(c *fiber.Ctx, image *models.Image, filename string) error {
 type imageRenderItem struct {
 	ImageURL    string `json:"image_url"`
 	InfoPage    string `json:"info_page"`
+	AdminPage   string `json:"admin_page"`
 	DeleteLink  string `json:"delete_link"`
 	FileSize    uint64 `json:"file_size"`
 	FileHash    string `json:"file_hash"`
@@ -238,6 +240,9 @@ func image2RenderItem(image *models.Image) (imageRenderItem, error) {
 	baseUrl.Path = fmt.Sprintf("/info/%s", hashid)
 	infoPage := baseUrl.String()
 
+	baseUrl.Path = fmt.Sprintf("/info/%s/%s", hashid, image.DeleteCode)
+	adminPage := baseUrl.String()
+
 	return imageRenderItem{
 		ImageURL:    imageUrl,
 		InfoPage:    infoPage,
@@ -247,6 +252,7 @@ func image2RenderItem(image *models.Image) (imageRenderItem, error) {
 		ContentType: image.ContentType,
 		UploadTime:  image.UploadTime,
 		FileHash:    image.FileHash,
+		AdminPage:   adminPage,
 	}, nil
 }
 

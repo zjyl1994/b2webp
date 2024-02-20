@@ -1,4 +1,10 @@
 <div id="main" data-title="{{.info.HashId}}">
+    {{if .admin}}
+    <blockquote class="mt">
+        当前页面包含删除连接，分享请使用 <a href="{{.info.InfoPage}}">信息页面</a>
+    </blockquote>
+    {{end}}
+
     <img src="{{.img}}" class="imageview imagesize mt">
 
     <table class="mt">
@@ -28,22 +34,16 @@
                 <th>大小</th>
                 <td data-render-text="formatBytes({{.info.FileSize}})"></td>
             </tr>
-            <tr id="del-link-row" style="display: none;">
-                <th>删除链接</th>
-                <td class="copy-text" title="点击复制" id="del-link-text"></td>
+            <tr>
+                <th>信息页面</th>
+                <td class="copy-text" title="点击复制">{{.info.InfoPage}}</td>
             </tr>
+            {{if .admin}}
+            <tr>
+                <th>删除链接</th>
+                <td class="copy-text" title="点击复制">{{.info.DeleteLink}}</td>
+            </tr>
+            {{end}}
         </tbody>
     </table>
 </div>
-
-<script>
-    const delLink = JSON.parse(localStorage.getItem('delLinks'));
-    if (delLink) {
-        delLink.forEach(element => {
-            if (element.includes("{{.info.HashId}}")) {
-                document.getElementById('del-link-text').innerText = element;
-                document.getElementById('del-link-row').style.display = '';
-            }
-        });
-    }
-</script>
