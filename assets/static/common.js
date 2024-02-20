@@ -15,9 +15,9 @@ function timestamp2str(ts) {
 }
 
 function formatBytes(bytes) {
-    var units = ['B', 'KB', 'MB', 'GB', 'TB'], i;
+    var units = ['B', 'KiB', 'MiB', 'GiB', 'TiB'], i;
     for (i = 0; bytes >= 1024 && i < 4; i++) bytes /= 1024;
-    return bytes.toFixed(2) + units[i];
+    return bytes.toFixed(2) +' '+ units[i];
 }
 
 window.onload = function () {
