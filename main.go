@@ -80,7 +80,7 @@ func errMain() (err error) {
 		logrus.Debugln("Memory cache size", memoryCacheSize.String())
 	}
 
-	hashidSetting := hashids.HashIDData{Alphabet: hashids.DefaultAlphabet, Salt: vars.Getenv("B2IMG_HASHID_SALT"), MinLength: 6}
+	hashidSetting := hashids.HashIDData{Alphabet: hashids.DefaultAlphabet, Salt: vars.Getenv("B2WEBP_HASHID_SALT"), MinLength: 6}
 	logrus.Debugln("HashID setting", hashidSetting)
 	vars.HashId, err = hashids.NewWithData(&hashidSetting)
 	if err != nil {
